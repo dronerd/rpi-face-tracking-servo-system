@@ -1,17 +1,19 @@
+#!/usr/bin/env python3
 """
-Modifications:
-- Face output prints center (cx, cy).
-- Servo 0,1,2 (indices 0..2): same one-shot behavior (0->180->wait->0) with 5s cooldown.
-- Servo 4 (index 4): one-shot sweep based on average of last 3 face center X readings.
-  * Pixel mapping: 70 -> 0 deg, 270 -> 180 deg.
-  * Deadzone: 150..170 (no movement).
-  * When action triggered: smooth sweep to mapped angle, wait 1s, return? (user asked for single sweep; we move from current to mapped and stop there).
-  * Small changes (< ANGLE_MOVE_THRESHOLD_LARGE) ignored.
-  * After sweep wait 1s (cooldown) before next movement.
-- Servos 3 & 5 (indices 3 and 5): same behavior but for Y axis using average of last 3 center Y.
-  * Pixel mapping: 40 -> 0 deg, 140 -> 180 deg.
-  * Deadzone: 85..105
-- Other smoothing thresholds and parameters tuned for slow, stable movements.
+servo_emotion_tracking.py
+
+Full system:
+- Face detection (OpenCV Haar)
+- Emotion recognition (TFLite)
+- Servo control (6 motors via GPIO)
+
+Behavior:
+- Servos 0–2: emotion-triggered actions (one-shot)
+- Servo 4: X-axis tracking (face horizontal position)
+- Servos 3 & 5: Y-axis tracking (face vertical position)
+
+Output:
+    TIMESTAMP | FACE | EMOTION | CENTER | SERVO ANGLES
 """
 
 import time

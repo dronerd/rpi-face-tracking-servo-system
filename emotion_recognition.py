@@ -1,84 +1,17 @@
-#以下が開発記録である。
-#  ①preparation. 
-# udate the system. 
-# connect to Raspberry Pi 5 via SSH remote from powershell
-# sudo apt update && sudo apt upgrade -y
-
-# ②Install system packages
-# sudo apt install -y python3-picamera2 python3-opencv libatlas-base-dev
-
-# ③Setup a python virtual environemnt to run the code in
-# python3 -m venv ~/emotion-env
-# source ~/emotion-env/bin/activate
-# pip install --upgrade pip setuptools wheel
-# pip install numpy opencv-python-headless
-
-# ④Install Tensorflow Lite runtime
-# pip install tflite-runtime
-
-# ⑤Save the emotion_realtime.py script onto the Raspberry pi 5 module from Thonny IDE
-# Code avaliable at other .txt file
-
-# ⑥Get the face emotion recognition model from Github
-# mkdir -p ~/models
-# cd ~/models
-# wget -O emotion_model.tflite https://raw.githubusercontent.com/neta000/emotion_detection_model/master/model.tflite
-
-# ⑦Numpyのversionによるエラーが出たら、以下のように対処する。
-# venvの中で、
-# pip install --upgrade pip setuptools wheel
-# pip uninstall -y numpy tflite-runtime
-# pip install "numpy<2.0,>=1.25.0"
-# pip install numpy==1.24.4
-# ＃reinstall tflite-runtime
-# pip install tflite-runtime
-
-# ⑧Picamera2のライブラリについてエラーが出たら、以下のように処理する
-# venvをdeactivateした後に、
-# sudo apt update
-# sudo apt install -y python3-picamera2 libcamera-apps
-# # remove old venv if you want to recreate (optional)
-# rm -rf ~/emotion-env
-# # create venv that inherits system packages
-# python3 -m venv --system-site-packages ~/emotion-env
-# source ~/emotion-env/bin/activate
-# # inside venv, install the rest (numpy/opencv/tflite etc.)
-# pip install --upgrade pip setuptools wheel
-# pip install numpy<2.0 opencv-python-headless tflite-runtime
-
-# ここでもしnumpy<2.0のinstallでNo such file or directoryとエラーが出たら、
-# 下のように対処する
-# # make sure pip/setuptools/wheel are up-to-date
-# pip install --upgrade pip setuptools wheel
-# # (optional) remove any previous installs to avoid conflicts
-# pip uninstall -y numpy tflite-runtime
-# # install a numpy 1.x series and OpenCV; 
-# pip install "numpy<2.0,>=1.25.0" opencv-python-headless
-# pip install tflite-runtime
-
-# ⑨コードを実行する
-# python3 ~/emotion_realtime.py --model /home/pi/models/emotion_model.tflite
-
-# ⑩Next steps:
-# Improve accuracy with replacing Haar Cascades with DNN or HOG?
-# Enable the implementation of code outside of Wifi local network. Enable usage at Waseda Wifi network. 
-# Enable output of data to arduino via TX RX serial communication.
-
-
 #!/usr/bin/env python3
 """
-emotion_realtime_64x64_rgb.py
+emotion_realtime.py
 
-Realtime face emotion recognition for Raspberry Pi (Picamera2) using a TFLite model.
-- Forces preprocessing to 64x64 RGB (suitable for neta000/emotion_detection_model).
-- Handles 4-channel frames (BGRA/XBGR) by converting to 3-channel RGB.
-- Robust TFLite predict() that respects actual input image shape.
-- Prints human-readable lines to stdout (timestamp | FACE# | label | score | bbox).
-- Includes a small per-face throttling (MIN_PRINT_INTERVAL) to reduce terminal flood.
+Realtime face emotion recognition on Raspberry Pi using:
+- Picamera2 (camera)
+- OpenCV (face detection)
+- TensorFlow Lite (inference)
 
-Usage:
-    python3 emotion_realtime_64x64_rgb.py --model /home/pi/models/emotion_model.tflite
-    python3 emotion_realtime_64x64_rgb.py --model /home/pi/models/emotion_model.tflite --show-window
+Outputs:
+    TIMESTAMP | FACE# | LABEL | SCORE | BBOX
+
+Example:
+    python3 emotion_realtime.py --model ~/models/emotion_model.tflite --show-window
 """
 
 import time

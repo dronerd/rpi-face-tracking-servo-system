@@ -1,28 +1,15 @@
-# 使用した方法：
-# 1: ラズパイの電源を入れる
-# 2: PowershellでSSH接続。
-# 3: Thonnyで以下①のコードをラズパイにface_positions.pyとして保存した。
-# 4: Powershellでpython3 face_positions.pyと打ってプログラムを実行
-
-# 注意事項：
-# OpenCVのライブラリをインストールした、
-# HaarCascadesのプログラムは自動でインスト―ルされなかったため、Githubから直接インストールした。
-# カメラを使用するためのライブラリは、libcameraではなく、Picamera2を使っている。
-# 母と父の顔でも認識できた、汎用性は高そう。
-# 始めの５秒ほどは出力の揺れが激しい。安定に時間がかかるのかも。
-# Ｘ座標とＹ座標が正しいかはまだわからない。
-# カメラのレンズを白い付属品で回せば、少し画質やピントが良くなるのかも？
-# Displayで確認をするには、ラズパイに直接接続が必要。
-# 今後は、ＳＳＨ接続が無くても自動で走るようにコードで設定し、自動でサーボ制御なども行うようにするべきだ。
-
 #!/usr/bin/env python3
 """
 face_positions.py
 
-- Uses Picamera2 + OpenCV Haar cascade to detect faces.
-- Prints: TIMESTAMP  CENTER_X  CENTER_Y  OFFSET_X  OFFSET_Y  (offsets in -1.0..+1.0)
-- Attempts to locate cascade in common paths, otherwise uses ~/haarcascade_frontalface_default.xml.
-- Optionally shows a GUI window if DISPLAY is available or --display passed.
+Detect faces using Picamera2 + OpenCV Haar Cascade.
+
+Outputs:
+    TIMESTAMP  CENTER_X  CENTER_Y  OFFSET_X  OFFSET_Y  WIDTHxHEIGHT
+
+Optional:
+    --display       Show camera preview window
+    --cascade PATH  Specify cascade file manually
 """
 
 import time
